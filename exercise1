@@ -1,0 +1,44 @@
+
+import csv
+
+
+def load_grades(file_path):
+
+    student_ids = []
+    original_grades = []
+    rows = []
+
+    with open(file_path, "r", encoding="utf-8-sig") as file:
+
+        reader = csv.DictReader(file)
+
+        headers = reader.fieldnames
+
+        if "ID" not in headers or "Grade" not in headers:
+            raise ValueError("CSV must contain ID and Grade columns")
+
+        for row in reader:
+
+            student_id = row["ID"]
+            grade = float(row["Grade"])
+
+            if grade < 0 or grade > 100:
+                raise ValueError("Grade must be between 0 and 100")
+
+            student_ids.append(student_id)
+            original_grades.append(grade)
+            rows.append(row)
+
+    if len(student_ids) > 50:
+        raise ValueError("Maximum 50 students allowed")
+
+    if len(student_ids) == 0:
+        raise ValueError("The CSV file is empty")
+
+    return {
+        "file_path": file_path,
+        "student_ids": student_ids,
+        "original_grades": original_grades,
+        "rows": rows,
+        "headers": headers
+    }
