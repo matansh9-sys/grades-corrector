@@ -1,6 +1,6 @@
-
 import csv
 import os
+from About import AboutWindow
 
 
 def load_grades(file_path):
@@ -130,6 +130,10 @@ class GradesWindow(QWidget):
         layout.addWidget(self.update_button)
         self.update_button.clicked.connect(self.update_file)
 
+        self.about_button = QPushButton("About")
+        layout.addWidget(self.about_button)
+
+        self.about_button.clicked.connect(self.open_about)
 
         self.bonus_input.editingFinished.connect(self.apply_bonus)
 
@@ -157,7 +161,6 @@ class GradesWindow(QWidget):
         self.original_grades = data["original_grades"]
         self.corrected_grades = data["original_grades"].copy()
         self.bonus_input.setValue(0)
-        self.selected_file = "grades.csv"
 
         for i in range(len(self.student_ids)):
 
@@ -223,11 +226,6 @@ class GradesWindow(QWidget):
     def update_file(self):
 
         if self.selected_file == "":
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Please select a CSV file first"
-            )
             return
 
         self.apply_bonus()
@@ -248,8 +246,18 @@ class GradesWindow(QWidget):
             "Success",
             "Grades updated successfully"
         )
-
         os.startfile(self.selected_file)
+
+    def open_about(self):
+
+        self.about_window = AboutWindow()
+        self.about_window.show()
+
+    
+
+
+
+
 
 
 
@@ -260,7 +268,11 @@ if __name__ == "__main__":
 
     app = QApplication([])
 
+    with open("style.qss", "r") as file:
+        app.setStyleSheet(file.read())
+
     window = GradesWindow()
     window.show()
 
     app.exec()
+
