@@ -42,3 +42,19 @@ def load_grades(file_path):
         "rows": rows,
         "headers": headers
     }
+
+
+def calculate_grades(original_grades, bonus):
+
+    corrected_grades = []
+
+    for grade in original_grades:
+
+        corrected_grade = grade + bonus
+
+        if corrected_grade > 100:
+            corrected_grade = 100
+
+        corrected_grades.append(corrected_grade)
+
+    return corrected_grades
