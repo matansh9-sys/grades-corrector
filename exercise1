@@ -58,3 +58,17 @@ def calculate_grades(original_grades, bonus):
         corrected_grades.append(corrected_grade)
 
     return corrected_grades
+
+
+def update_grades_file(filename, student_ids, corrected_grades):
+
+    if len(student_ids) != len(corrected_grades):
+        print("Error: Number of grades does not match")
+        return
+
+    with open(filename, "w") as f:
+
+        print("ID,Grade", file=f)
+
+        for i in range(len(student_ids)):
+            print(student_ids[i], corrected_grades[i], sep=",", file=f)
