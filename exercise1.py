@@ -1,5 +1,6 @@
 
 import csv
+import os
 
 
 def load_grades(file_path):
@@ -83,11 +84,23 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QPushButton,
     QFileDialog,
-    QMessageBox
+    QMessageBox,
+    QSpinBox
 )
+
+def update_grades_file(filename, student_ids, corrected_grades):
+
+    with open(filename, "w") as f:
+
+        print("ID,Grade", file=f)
+
+        for i in range(len(student_ids)):
+
+            print(student_ids[i], corrected_grades[i], sep=",", file=f)
 
 class GradesWindow(QWidget):
 
+    
     def __init__(self):
         super().__init__()
 
@@ -101,12 +114,26 @@ class GradesWindow(QWidget):
 
         layout = QVBoxLayout()
 
+        # Open file button
         self.open_button = QPushButton("Open CSV File")
         layout.addWidget(self.open_button)
 
         self.open_button.clicked.connect(self.choose_file)
 
+        # Bonus SpinBox
+        self.bonus_input = QSpinBox()
+        self.bonus_input.setRange(0, 100)
+        self.bonus_input.setPrefix("Bonus: ")
 
+        layout.addWidget(self.bonus_input)
+        self.update_button = QPushButton("Update File")
+        layout.addWidget(self.update_button)
+        self.update_button.clicked.connect(self.update_file)
+
+
+        self.bonus_input.editingFinished.connect(self.apply_bonus)
+
+        # Grades table
         self.table = QTableWidget()
         self.table.setRowCount(50)
         self.table.setColumnCount(3)
@@ -118,7 +145,9 @@ class GradesWindow(QWidget):
         ])
 
         layout.addWidget(self.table)
+
         self.setLayout(layout)
+
 
     def load_table(self):
 
@@ -127,6 +156,7 @@ class GradesWindow(QWidget):
         self.student_ids = data["student_ids"]
         self.original_grades = data["original_grades"]
         self.corrected_grades = data["original_grades"].copy()
+        self.bonus_input.setValue(0)
         self.selected_file = "grades.csv"
 
         for i in range(len(self.student_ids)):
@@ -162,6 +192,66 @@ class GradesWindow(QWidget):
         if filename != "":
             self.selected_file = filename
             self.load_table()
+
+    
+    def apply_bonus(self):
+
+        if self.selected_file == "":
+            QMessageBox.warning(
+                self,
+                "Error",
+                "Please select a CSV file first"
+            )
+            return
+
+        bonus = self.bonus_input.value()
+
+        self.corrected_grades = calculate_grades(
+            self.original_grades,
+            bonus
+        )
+
+        for i in range(len(self.corrected_grades)):
+
+            corrected_item = QTableWidgetItem(
+                str(self.corrected_grades[i])
+            )
+
+            self.table.setItem(i, 2, corrected_item)
+
+    
+    def update_file(self):
+
+        if self.selected_file == "":
+            QMessageBox.warning(
+                self,
+                "Error",
+                "Please select a CSV file first"
+            )
+            return
+
+        self.apply_bonus()
+
+        try:
+            update_grades_file(
+                self.selected_file,
+                self.student_ids,
+                self.corrected_grades
+            )
+
+        except Exception as error:
+            QMessageBox.warning(self, "Error", str(error))
+            return
+
+        QMessageBox.information(
+            self,
+            "Success",
+            "Grades updated successfully"
+        )
+
+        os.startfile(self.selected_file)
+
+
 
 
 
