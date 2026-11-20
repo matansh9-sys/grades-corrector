@@ -74,12 +74,16 @@ def update_grades_file(filename, student_ids, corrected_grades):
             print(student_ids[i], corrected_grades[i], sep=",", file=f)
 
 
+
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
     QVBoxLayout,
     QTableWidget,
-    QTableWidgetItem
+    QTableWidgetItem,
+    QPushButton,
+    QFileDialog,
+    QMessageBox
 )
 
 class GradesWindow(QWidget):
@@ -97,6 +101,12 @@ class GradesWindow(QWidget):
 
         layout = QVBoxLayout()
 
+        self.open_button = QPushButton("Open CSV File")
+        layout.addWidget(self.open_button)
+
+        self.open_button.clicked.connect(self.choose_file)
+
+
         self.table = QTableWidget()
         self.table.setRowCount(50)
         self.table.setColumnCount(3)
@@ -110,11 +120,9 @@ class GradesWindow(QWidget):
         layout.addWidget(self.table)
         self.setLayout(layout)
 
-        self.load_table()
-
     def load_table(self):
 
-        data = load_grades("grades.csv")
+        data = load_grades(self.selected_file)
 
         self.student_ids = data["student_ids"]
         self.original_grades = data["original_grades"]
@@ -138,6 +146,23 @@ class GradesWindow(QWidget):
             self.table.setItem(i, 0, id_item)
             self.table.setItem(i, 1, original_item)
             self.table.setItem(i, 2, corrected_item)
+
+    
+    def choose_file(self):
+
+        result = QFileDialog.getOpenFileName(
+            self,
+            "Choose CSV File",
+            "",
+            "CSV Files (*.csv)"
+        )
+
+        filename = result[0]
+
+        if filename != "":
+            self.selected_file = filename
+            self.load_table()
+
 
 
 
